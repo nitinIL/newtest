@@ -54,6 +54,11 @@ data:
        # conditional splitting
       
       #<PARSE COND>
+    if( $arg_typ ~ "(^45$)" ) {
+        set $variant $variant3;
+        set $present true;
+    }
+
 
     #</PARSE>
 
