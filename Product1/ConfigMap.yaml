@@ -21,7 +21,7 @@ data:
     split_clients "${msec}" $variant1 {
         50%   signup.nwc1.com;
         45%   signup.nwc2.com;
-        5%   test.signup.com;
+        5%   test.nwc.com;
     }
 
     split_clients "${msec}" $variant2 {
@@ -54,15 +54,7 @@ data:
        # conditional splitting
       
       #<PARSE COND>
-    if( $arg_p ~ "(^64$|^65$)" ) {
-        set $variant $variant1;
-        set $present true;
-    }
 
-    if( $arg_p ~ "(^yahoo$)" ) {
-        set $variant $variant2;
-        set $present true;
-    }
     #</PARSE>
 
     #<PARSE CONDP>
@@ -71,13 +63,8 @@ data:
         set $present true;
     }
 
-    if( $arg_utm_source ~ "(^98$)" ) {
-        set $variant $variant4;
-        set $present true;
-    }
-
-    if( $arg_p ~ "(^98$)" ) {
-        set $variant $variant4;
+    if( $arg_utm_source ~ "(^64$)" ) {
+        set $variant $variant2;
         set $present true;
     }
 
