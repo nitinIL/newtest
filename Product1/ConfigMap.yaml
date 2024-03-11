@@ -54,15 +54,7 @@ data:
        # conditional splitting
       
       #<PARSE COND>
-    if( $arg_p ~ "(^64$|^65$)" ) {
-        set $variant $variant1;
-        set $present true;
-    }
 
-    if( $arg_p ~ "(^yahoo$)" ) {
-        set $variant $variant2;
-        set $present true;
-    }
     #</PARSE>
 
     #<PARSE CONDP>
