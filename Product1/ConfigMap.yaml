@@ -54,7 +54,7 @@ data:
     }
 
     if( $arg_utm_source ~ "(^64$)" ) {
-        set $variant $variant1;
+        set $variant $variant3;
         set $present true;
     }
 
