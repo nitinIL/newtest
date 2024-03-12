@@ -40,11 +40,6 @@ data:
         20%   signup.nwc2.com;
     }
 
-    split_clients "${msec}" $variant5 {
-        90%   signup.nwc1.com;
-        10%   signup.nwc2.com;
-    }
-
 
     #</PARSE>
        # use :var1:var2:var3: -> "~^:.*:.*:.*:$"
