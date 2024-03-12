@@ -45,7 +45,7 @@ data:
       
       #<PARSE COND>
     if( $arg_typ ~ "(^45$)" ) {
-        set $variant $variant3;
+        set $variant $variant2;
         set $present true;
     }
 
