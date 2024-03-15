@@ -30,15 +30,6 @@ data:
         5%   test.signup.com;
     }
 
-    split_clients "${msec}" $variant3 {
-        70%   signup.nwc1.com;
-        30%   signup.nwc2.com;
-    }
-
-    split_clients "${msec}" $variant4 {
-        80%   signup.nwc1.com;
-        20%   signup.nwc2.com;
-    }
 
     split_clients "${msec}" $variant5 {
         90%   signup.nwc1.com;
