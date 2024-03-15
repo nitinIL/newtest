@@ -30,7 +30,6 @@ data:
         5%   test.signup.com;
     }
 
-
     split_clients "${msec}" $variant5 {
         90%   signup.nwc1.com;
         10%   signup.nwc2.com;
@@ -51,20 +50,14 @@ data:
     }
 
     if( $arg_p ~ "(^yahoo$)" ) {
-        set $variant $variant2;
+        set $variant $variant1;
         set $present true;
     }
+
+
     #</PARSE>
 
     #<PARSE CONDP>
-    
-
-
-    if( $arg_p ~ "(^98$)" ) {
-        set $variant $variant4;
-        set $present true;
-    }
-
 
     #</PARSE>
 
