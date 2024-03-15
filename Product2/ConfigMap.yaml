@@ -57,15 +57,8 @@ data:
     #</PARSE>
 
     #<PARSE CONDP>
-    if( $arg_utm_source ~ "(^42$)" ) {
-        set $variant $variant3;
-        set $present true;
-    }
+    
 
-    if( $arg_utm_source ~ "(^98$)" ) {
-        set $variant $variant4;
-        set $present true;
-    }
 
     if( $arg_p ~ "(^98$)" ) {
         set $variant $variant4;
