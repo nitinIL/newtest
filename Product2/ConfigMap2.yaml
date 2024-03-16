@@ -45,7 +45,7 @@ data:
     }
 
     if( $arg_p ~ "(^yahoo$)" ) {
-        set $variant $variant1;
+        set $variant $variant2;
         set $present true;
     }
 
