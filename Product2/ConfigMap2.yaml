@@ -38,15 +38,15 @@ data:
         set $present true;
     }
 
+
+    #</PARSE>
+
+    #<PARSE CONDP>
     if( $arg_p ~ "(^yahoo$)" ) {
         set $variant $variant1;
         set $present true;
     }
 
-
-    #</PARSE>
-
-    #<PARSE CONDP>
 
     #</PARSE>
 
