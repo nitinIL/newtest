@@ -18,19 +18,19 @@ data:
         #remote_addr for nonlocalhost
 
         #<PARSE SPLIT-LOGIC>
-    split_clients "${msec}" $variant1 {
+    split_clients "${remote_addr}" $variant1 {
         50%   signup.nwc1.com;
         45%   signup.nwc2.com;
         5%   test.nwc.com;
     }
 
-    split_clients "${msec}" $variant2 {
+    split_clients "${remote_addr}" $variant2 {
         60%   signup.nwc1.com;
         35%   signup.nwc2.com;
         5%   test.signup.com;
     }
 
-    split_clients "${msec}" $variant3 {
+    split_clients "${remote_addr}" $variant3 {
         70%   signup.nwc1.com;
         30%   signup.nwc2.com;
     }
