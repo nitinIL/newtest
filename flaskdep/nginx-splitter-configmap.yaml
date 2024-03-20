@@ -76,12 +76,12 @@ data:
                   set $variant $sc_host2;
                   set $present true;
               }
-             </PARSE>
+             #</PARSE>
              if ($cookie_persistent_backend) {
                           set $variant $cookie_persistent_backend;
                       }
-             <PARSE CONDP>
-             </PARSE>
+             #<PARSE CONDP>
+             #</PARSE>
 
 
                   if ( $uri = "/static/nwc1"){
