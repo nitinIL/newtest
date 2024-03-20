@@ -4,120 +4,124 @@ metadata:
   name: nginx-splitter-configmap
 data:
   nginx.conf: |
-          events {
+    events {
+      
+        }
+
+        http {
+        #upgrade required is coming
+        proxy_http_version 1.1;
+
+
+
+        log_format cus_format 'P_ARG: "$arg_p" - P_UTM: "$arg_utm_source" - BACKENDHOST: "$variant" - SCHOST: "$sc_host" - SCHOST2: "$sc_host2"  - REMOTEURL: "$uri" - INGRESS: "$ingress"';
+        
+
+        #remote_addr for nonlocalhost
+        #split logic 1
+        #<PARSE SPLIT-LOGIC>
+    split_clients "${remote_addr}" $sc_host {
+        70%   signup.nwc1.com;
+        30%   signup.nwc2.com;
+    }
+
+    split_clients "${remote_addr}" $sc_host2 {
+        80%   signup.nwc1.com;
+        20%   signup.nwc2.com;
+    }
+
+
+    #</PARSE>
+       # use :var1:var2:var3: -> "~^:.*:.*:.*:$"
+       # now add conditions for each var
+       # if want to match var1 can be 45 or 64 do "~^:(45|64):.*:.*:$"
+
+       # conditional splitting
+       
+      map "$variant" $ingress{
+                    default 10.142.0.6;
+                    signup.nwc1.com 10.142.0.5;
+                    signup.nwc2.com 10.142.0.5;
+                  }
+
+        server {
+            listen 80;
+            server_name localhost;
+
+            location / {
+                return 200 "LOCALHOST HOMEPAGE";
+            }
+        }
+
+        server {
+
             
-              }
 
-              http {
-              #upgrade required is coming
-              proxy_http_version 1.1;
+            listen 80;
+            server_name signup.nwc.com;
+            
+            set $ingress1 10.142.0.5;
+            set $ingress2 10.142.0.6;
+            
 
+            set $variant signup.nwc3.com;
 
+       #<PARSE COND>
+    if ( $arg_utm_source ~ "(^42$)" ) {
+        set $variant $sc_host;
+        set $present true;
+    }
 
-              log_format cus_format 'P_ARG: "$arg_p" - P_UTM: "$arg_utm_source" - BACKENDHOST: "$variant" - SCHOST: "$sc_host" - SCHOST2: "$sc_host2"  - REMOTEURL: "$uri" - INGRESS: "$ingress"';
-              
-
-              #remote_addr for nonlocalhost
-              #split logic 1
-              #<PARSE SPLIT-LOGIC>
-              split_clients "${remote_addr}" $sc_host {
-                  50%   signup.nwc1.com;
-                  50%     signup.nwc2.com;
-              }
-              
-              #split logic 2
-              split_clients "${remote_addr}" $sc_host2 {
-                  80%   signup.nwc1.com;
-                  20%   signup.nwc2.com;
-              }
-            #</PARSE>
-             # use :var1:var2:var3: -> "~^:.*:.*:.*:$"
-             # now add conditions for each var
-             # if want to match var1 can be 45 or 64 do "~^:(45|64):.*:.*:$"
-
-             # conditional splitting
-             
-            map "$variant" $ingress{
-                          default 10.142.0.6;
-                          signup.nwc1.com 10.142.0.5;
-                          signup.nwc2.com 10.142.0.5;
-                        }
-
-              server {
-                  listen 80;
-                  server_name localhost;
-
-                  location / {
-                      return 200 "LOCALHOST HOMEPAGE";
-                  }
-              }
-
-              server {
-
-                  
-
-                  listen 80;
-                  server_name signup.nwc.com;
-                  
-                  set $ingress1 10.142.0.5;
-                  set $ingress2 10.142.0.6;
-                  
-
-                  set $variant signup.nwc3.com;
-
-             #<PARSE COND>
-                  if ( $arg_utm_source ~ "(^42$)" ) {
-                  set $variant $sc_host;
-                  set $present true;
-              }
-
-              if ( $arg_utm_source ~ "(^64$)" ) {
-                  set $variant $sc_host2;
-                  set $present true;
-              }
-             #</PARSE>
-             if ($cookie_persistent_backend) {
-                          set $variant $cookie_persistent_backend;
-                      }
-             #<PARSE CONDP>
-             #</PARSE>
+    if ( $arg_utm_source ~ "(^64$)" ) {
+        set $variant $sc_host2;
+        set $present true;
+    }
 
 
-                  if ( $uri = "/static/nwc1"){
-                    set $ingress $ingress1;
-                    set $variant signup.nwc1.com;
-                  }
+    #</PARSE>
+       if ($cookie_persistent_backend) {
+                    set $variant $cookie_persistent_backend;
+                }
+       #<PARSE CONDP>
 
-                  if ( $uri = "/static/nwc2"){
-                    set $ingress $ingress1;
-                    set $variant signup.nwc2.com;
-                  }
-
-                  if ( $uri = "/static/nwc3"){
-                    set $ingress $ingress2;
-                    set $variant signup.nwc3.com;
-                  }
-
-                  location /static/nwc {
-                          
-                          rewrite /static/.* / break;
-                          proxy_pass http://$ingress;
-                          proxy_set_header Host $variant;
-                  
-                  }
+    #</PARSE>
 
 
-                  location / {
+            if ( $uri = "/static/nwc1"){
+              set $ingress $ingress1;
+              set $variant signup.nwc1.com;
+            }
 
-                     # only go to persistent if splitting occurs else always serve flask 3
-                      
-                      add_header Set-Cookie "persistent_backend=$variant";
-                      proxy_pass http://$ingress;
-                      proxy_set_header Host $variant;
-                      
-                      
-                  }
+            if ( $uri = "/static/nwc2"){
+              set $ingress $ingress1;
+              set $variant signup.nwc2.com;
+            }
 
-                  access_log /var/log/nginx/access.log cus_format;
-              }
-              }
+            if ( $uri = "/static/nwc3"){
+              set $ingress $ingress2;
+              set $variant signup.nwc3.com;
+            }
+
+            location /static/nwc {
+                    
+                    rewrite /static/.* / break;
+                    proxy_pass http://$ingress;
+                    proxy_set_header Host $variant;
+            
+            }
+
+
+            location / {
+
+               # only go to persistent if splitting occurs else always serve flask 3
+                
+                add_header Set-Cookie "persistent_backend=$variant";
+                proxy_pass http://$ingress;
+                proxy_set_header Host $variant;
+                
+                
+            }
+
+            access_log /var/log/nginx/access.log cus_format;
+        }
+        }
