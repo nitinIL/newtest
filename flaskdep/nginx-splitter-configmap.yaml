@@ -66,7 +66,7 @@ data:
 
                   set $variant signup.nwc3.com;
 
-                  <PARSE COND>
+             #<PARSE COND>
                   if ( $arg_utm_source ~ "(^42$)" ) {
                   set $variant $sc_host;
                   set $present true;
