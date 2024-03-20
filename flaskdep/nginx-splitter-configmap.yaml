@@ -1,10 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nginx-config
+  name: nginx-splitter-configmap
 data:
   nginx.conf: |
-        
         
           events {
             
@@ -14,18 +13,20 @@ data:
               #upgrade required is coming
               proxy_http_version 1.1;
 
-              log_format cus_format 'P_ARG: "$arg_p" - P_UTM: "$arg_utm_source" - BACKENDHOST: "$backend_host" - SCHOST: "$sc_host" - SCHOST2: "$sc_host2"  - REMOTEURL: "$uri" - INGRESS: "$ingress"';
+
+
+              log_format cus_format 'P_ARG: "$arg_p" - P_UTM: "$arg_utm_source" - BACKENDHOST: "$variant" - SCHOST: "$sc_host" - SCHOST2: "$sc_host2"  - REMOTEURL: "$uri" - INGRESS: "$ingress"';
               
 
               #remote_addr for nonlocalhost
               #split logic 1
-              split_clients "${msec}" $sc_host {
+              split_clients "${remote_addr}" $sc_host {
                   50%   signup.nwc1.com;
                   50%     signup.nwc2.com;
               }
               
               #split logic 2
-              split_clients "${msec}" $sc_host2 {
+              split_clients "${remote_addr}" $sc_host2 {
                   80%   signup.nwc1.com;
                   20%   signup.nwc2.com;
               }
@@ -35,21 +36,12 @@ data:
              # if want to match var1 can be 45 or 64 do "~^:(45|64):.*:.*:$"
 
              # conditional splitting
-             if( "$arg_p ")
-              map ":$arg_p:$arg_utm_source:" $backend_host{
-                      default signup.nwc3.com;
-                      "~^:64:.*:$" $sc_host2;
-                      "~^:.*:(64|98):$" $sc_host2;
-                      "~^:.*:42:$" $sc_host;
-                      }
              
-
-              map "$backend_host" $ingress{
-                          default 10.133.0.163;
-                          signup.nwc1.com 10.133.0.180;
-                          signup.nwc2.com 10.133.0.180;
+            map "$variant" $ingress{
+                          default 10.142.0.6;
+                          signup.nwc1.com 10.142.0.5;
+                          signup.nwc2.com 10.142.0.5;
                         }
-
 
               server {
                   listen 80;
@@ -66,30 +58,46 @@ data:
 
                   listen 80;
                   server_name signup.nwc.com;
-
-                  set $ingress1 10.133.0.180;
-                  set $ingress2 10.133.0.163;
                   
+                  set $ingress1 10.142.0.5;
+                  set $ingress2 10.142.0.6;
+                  
+
+                  set $variant signup.nwc3.com;
+
+                  if ( $arg_utm_source ~ "(^42$)" ) {
+                  set $variant $sc_host;
+                  set $present true;
+              }
+
+              if ( $arg_utm_source ~ "(^64$)" ) {
+                  set $variant $sc_host2;
+                  set $present true;
+              }
+             
+
+              
+
                   if ( $uri = "/static/nwc1"){
                     set $ingress $ingress1;
-                    set $backend_host signup.nwc1.com;
+                    set $variant signup.nwc1.com;
                   }
 
                   if ( $uri = "/static/nwc2"){
                     set $ingress $ingress1;
-                    set $backend_host signup.nwc2.com;
+                    set $variant signup.nwc2.com;
                   }
 
                   if ( $uri = "/static/nwc3"){
                     set $ingress $ingress2;
-                    set $backend_host signup.nwc3.com;
+                    set $variant signup.nwc3.com;
                   }
 
                   location /static/nwc {
                           
                           rewrite /static/.* / break;
                           proxy_pass http://$ingress;
-                          proxy_set_header Host $backend_host;
+                          proxy_set_header Host $variant;
                   
                   }
 
@@ -97,24 +105,24 @@ data:
                   location / {
 
                      # only go to persistent if splitting occurs else always serve flask 3
-                      set $split_host $backend_host;
+                      set $split_host $variant;
 
                       if ($cookie_persistent_backend) {
-                          set $backend_host $cookie_persistent_backend;
+                          set $variant $cookie_persistent_backend;
                       }
                       
                       # split_host = signup.nwc3.com means splitting doesn't occurs
-                      if ($split_host = signup.nwc3.com){
-                          set $backend_host $split_host;
+                      if ($present){
+                          set $variant $split_host;
                       }
                     
                        # no need to set persistent to flask3
-                      if ($backend_host != signup.nwc3.com){
-                      add_header Set-Cookie "persistent_backend=$backend_host";
+                      if ($variant != signup.nwc3.com){
+                      add_header Set-Cookie "persistent_backend=$variant";
                       }
 
                       proxy_pass http://$ingress;
-                      proxy_set_header Host $backend_host;
+                      proxy_set_header Host $variant;
                       
                       
                   }
