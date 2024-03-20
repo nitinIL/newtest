@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  annotations:
+    #kubernetes.io/ingress.regional-static-ip-name: "ingress1"
+    kubernetes.io/ingress.class: "gce-internal"
+spec:
+  # ingressClassName: gce-internal
+  rules:
+  - host: signup.nwc1.com
+    http:
+      paths:
+      - pathType: ImplementationSpecific
+        backend:
+          service:
+            name: flasksvc
+            port:
+              number: 80
+
+  - host: signup.nwc2.com
+    http:
+      paths:
+      - pathType: ImplementationSpecific
+        backend:
+          service:
+            name: flasksvc2
+            port:
+              number: 80
