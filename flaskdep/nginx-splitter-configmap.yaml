@@ -20,6 +20,7 @@ data:
 
               #remote_addr for nonlocalhost
               #split logic 1
+              #<PARSE SPLIT-LOGIC>
               split_clients "${remote_addr}" $sc_host {
                   50%   signup.nwc1.com;
                   50%     signup.nwc2.com;
@@ -30,7 +31,7 @@ data:
                   80%   signup.nwc1.com;
                   20%   signup.nwc2.com;
               }
-
+            #</PARSE>
              # use :var1:var2:var3: -> "~^:.*:.*:.*:$"
              # now add conditions for each var
              # if want to match var1 can be 45 or 64 do "~^:(45|64):.*:.*:$"
@@ -65,6 +66,7 @@ data:
 
                   set $variant signup.nwc3.com;
 
+                  <PARSE COND>
                   if ( $arg_utm_source ~ "(^42$)" ) {
                   set $variant $sc_host;
                   set $present true;
@@ -74,9 +76,13 @@ data:
                   set $variant $sc_host2;
                   set $present true;
               }
-             
+             </PARSE>
+             if ($cookie_persistent_backend) {
+                          set $variant $cookie_persistent_backend;
+                      }
+             <PARSE CONDP>
+             </PARSE>
 
-              
 
                   if ( $uri = "/static/nwc1"){
                     set $ingress $ingress1;
@@ -105,22 +111,8 @@ data:
                   location / {
 
                      # only go to persistent if splitting occurs else always serve flask 3
-                      set $split_host $variant;
-
-                      if ($cookie_persistent_backend) {
-                          set $variant $cookie_persistent_backend;
-                      }
                       
-                      # split_host = signup.nwc3.com means splitting doesn't occurs
-                      if ($present){
-                          set $variant $split_host;
-                      }
-                    
-                       # no need to set persistent to flask3
-                      if ($variant != signup.nwc3.com){
                       add_header Set-Cookie "persistent_backend=$variant";
-                      }
-
                       proxy_pass http://$ingress;
                       proxy_set_header Host $variant;
                       
