@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-splitter-configmap
+          
+
+
+          
+            # custom format debug
+
+            # split function -> get before you pass 
+            # nginx hash function in splitting
+
+            # multiple backends 
+            # some NWC version connected to different LB. 
+
+
+
+            # /static/nwc1 --> irrespective of any parameter even previous cookie directly route to respective -> corresponding ingress
+            # /static/nwc2 --> 
+            # /static/nwc3 --> 
+
+            # 2 ingress
+
+            # p = 10 utm_source = 10
+
+
+
+
+
+
+
+
+
+      
+
