@@ -21,8 +21,8 @@ data:
         #split logic 1
         #<PARSE SPLIT-LOGIC>
     split_clients "${remote_addr}" $sc_host {
-        70%   signup.nwc1.com;
-        30%   signup.nwc2.com;
+        60%   signup.nwc1.com;
+        40%   signup.nwc2.com;
     }
 
     split_clients "${remote_addr}" $sc_host2 {
