@@ -67,7 +67,7 @@ data:
             set $variant signup.nwc3.com;
 
        #<PARSE COND>
-    if ( $arg_utm_source ~ "(^64$)" ) {
+    if ( $arg_utm_source ~ "(^42$)" ) {
         set $variant $sc_host;
         set $present true;
     }
@@ -78,7 +78,7 @@ data:
                     set $variant $cookie_persistent_backend;
                 }
        #<PARSE CONDP>
-    if ( $arg_utm_source ~ "(^42$)" ) {
+    if ( $arg_utm_source ~ "(^64$)" ) {
         set $variant $sc_host;
         set $present true;
     }
